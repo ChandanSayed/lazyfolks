@@ -4,6 +4,8 @@ import { useImmer } from 'use-immer';
 import { IoEyeOutline } from 'react-icons/io5';
 import { IoEyeOffOutline } from 'react-icons/io5';
 import { useState } from 'react';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,8 +18,42 @@ export default function Home() {
 
   const { phone, email, password, privacyAccepted } = userDetails;
   // Handle form submit
-  const handleSignup = () => {
-    console.log('Signing up...');
+  const handleSignup = async () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[6-9]\d{9}$/;
+
+    if (!emailRegex.test(email)) {
+      console.log('Invalid Email');
+      return;
+    }
+
+    if (!phoneRegex.test(phoneNumber)) {
+      console.log('Invalid Phone');
+      return;
+    }
+
+    const res = await axios.post('https://dev-api.lazyfolks.in/accounts/signup/', { phone, email, password });
+    console.log(res.data);
+    console.log(userDetails);
+    if (res.data.status === 200) {
+      Swal.fire({
+        title: 'Good job!',
+        text: 'Sign Up Successful!',
+        icon: 'success'
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Something went wrong!'
+      });
+    }
+    setUserDetails({
+      phone: '',
+      email: '',
+      password: '',
+      privacyAccepted: false
+    });
   };
 
   // event handler to store value to the state
